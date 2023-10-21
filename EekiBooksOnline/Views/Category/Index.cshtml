@@ -21,6 +21,7 @@
         <tr>
             <th>Category Name</th>
             <th>Display Order</th>
+            <th>Update a Record</th>
         </tr>
     </thead>
     <tbody>
@@ -32,6 +33,14 @@
                 </td>
                 <td width="30%">
                     @obj.DisplayOrder
+                </td>
+                <td>
+                    <div class="w-auto btn-group" role="group">
+                        <a asp-controller="Category" asp-action="Edit" asp-route-id="@obj.Id" class="btn btn-primary mx-2">
+                            <i class="bi bi-pencil-square"></i>
+                            Edit
+                        </a>
+                    </div>
                 </td>
             </tr>
         }
