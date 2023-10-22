@@ -1,4 +1,4 @@
-namespace EekiBooksOnline.Models
+namespace EekiBooks.Models
 {
     public class ErrorViewModel
     {

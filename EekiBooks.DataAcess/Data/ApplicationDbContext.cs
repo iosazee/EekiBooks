@@ -1,7 +1,7 @@
-﻿using EekiBooksOnline.Models;
+﻿using EekiBooks.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace EekiBooksOnline.Data
+namespace EekiBooks.DataAccess
 {
     public class ApplicationDbContext : DbContext
     {
