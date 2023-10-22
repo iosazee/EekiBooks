@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34202.233
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EekiBooksOnline", "EekiBooksOnline\EekiBooksOnline.csproj", "{5CBB2E9E-2FFE-44CD-90E7-40728E53770A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EekiBooksOnline", "EekiBooksOnline\EekiBooksOnline.csproj", "{5CBB2E9E-2FFE-44CD-90E7-40728E53770A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EekiBooks.DataAcess", "EekiBooks.DataAcess\EekiBooks.DataAcess.csproj", "{AB8C60F3-76BF-440B-9E7E-D32747906940}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EekiBooks.Models", "EekiBooks.Models\EekiBooks.Models.csproj", "{11316D6D-C2B3-431A-AA07-D5A6B4225009}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EekiBooks.Utilities", "EekiBooks.Utilities\EekiBooks.Utilities.csproj", "{16B3A2FC-5C4D-49EC-83CA-3D6DB9CD9A70}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +21,18 @@ Global
 		{5CBB2E9E-2FFE-44CD-90E7-40728E53770A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5CBB2E9E-2FFE-44CD-90E7-40728E53770A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5CBB2E9E-2FFE-44CD-90E7-40728E53770A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB8C60F3-76BF-440B-9E7E-D32747906940}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB8C60F3-76BF-440B-9E7E-D32747906940}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB8C60F3-76BF-440B-9E7E-D32747906940}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB8C60F3-76BF-440B-9E7E-D32747906940}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11316D6D-C2B3-431A-AA07-D5A6B4225009}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11316D6D-C2B3-431A-AA07-D5A6B4225009}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11316D6D-C2B3-431A-AA07-D5A6B4225009}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11316D6D-C2B3-431A-AA07-D5A6B4225009}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16B3A2FC-5C4D-49EC-83CA-3D6DB9CD9A70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16B3A2FC-5C4D-49EC-83CA-3D6DB9CD9A70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16B3A2FC-5C4D-49EC-83CA-3D6DB9CD9A70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16B3A2FC-5C4D-49EC-83CA-3D6DB9CD9A70}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

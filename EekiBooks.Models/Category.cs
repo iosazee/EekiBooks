@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EekiBooksOnline.Models
+namespace EekiBooks.Models
 {
     public class Category
     {

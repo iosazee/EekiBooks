@@ -1,5 +1,5 @@
-﻿using EekiBooksOnline.Data;
-using EekiBooksOnline.Models;
+﻿using EekiBooks.DataAccess;
+using EekiBooks.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EekiBooksOnline.Controllers
