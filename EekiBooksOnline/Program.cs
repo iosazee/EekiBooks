@@ -1,4 +1,6 @@
 using EekiBooks.DataAccess;
+using EekiBooks.DataAcess.Repository;
+using EekiBooks.DataAcess.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -8,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 var connString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connString));
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 var app = builder.Build();
 
