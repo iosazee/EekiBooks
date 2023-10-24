@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace EekiBooksOnline.Controllers
+namespace EekiBooksOnline.Areas.Customer.Controllers
 {
     public class HomeController : Controller
     {

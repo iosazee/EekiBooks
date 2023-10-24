@@ -3,7 +3,7 @@ using EekiBooks.DataAcess.Repository.IRepository;
 using EekiBooks.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EekiBooksOnline.Controllers
+namespace EekiBooksOnline.Areas.Admin.Controllers
 {
     public class CategoryController : Controller
     {
