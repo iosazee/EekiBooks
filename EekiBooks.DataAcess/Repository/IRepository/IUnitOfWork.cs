@@ -13,6 +13,8 @@ namespace EekiBooks.DataAcess.Repository.IRepository
         ICoverTypeRepository CoverType { get; }
 
         IProductRepository Product { get; }
+
+        ICompanyRepository Company { get; }
         void Save();
     }
 }
