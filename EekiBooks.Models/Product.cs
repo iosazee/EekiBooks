@@ -40,7 +40,7 @@ namespace EekiBooks.Models
         [Required]
         public int CategoryId { get; set; }
         [ValidateNever]
-        public  Category Category { get; set; }
+        public Category Category { get; set; }
         [Display(Name = "Cover Type")]
         [Required]
         public int CoverTypeId { get; set; }

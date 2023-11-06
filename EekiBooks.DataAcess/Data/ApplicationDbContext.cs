@@ -22,6 +22,7 @@ namespace EekiBooks.DataAccess
 
         public DbSet<Company> Companiess { get; set; }
 
+        public DbSet<ShoppingCart> ShoppingCarts { get; set; }
     }
 }
 
