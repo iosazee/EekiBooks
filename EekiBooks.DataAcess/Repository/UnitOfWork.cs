@@ -1,5 +1,6 @@
 ﻿using EekiBooks.DataAccess;
 using EekiBooks.DataAcess.Repository.IRepository;
+using EekiBooks.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,9 @@ namespace EekiBooks.DataAcess.Repository
             Company = new CompanyRepository(_db);
             ShoppingCart = new ShoppingCartRepository(_db);
             ApplicationUser = new ApplicationUserRepository(_db);
-
+            OrderHeader = new OrderHeaderRepository(_db);
+            OrderDetail = new OrderDetailRepository(_db);
+     
         }
         public ICategoryRepository Category { get; private set; }
 
@@ -35,9 +38,13 @@ namespace EekiBooks.DataAcess.Repository
 
         public IShoppingCartRepository ShoppingCart { get; private set; }
 
+		public IOrderHeaderRepository OrderHeader { get; private set; }
+
+		public IOrderDetailRepository OrderDetail { get; private set; }
 
 
-        public void Save()
+
+		public void Save()
         {
             _db.SaveChanges();
         }

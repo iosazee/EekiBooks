@@ -19,6 +19,10 @@ namespace EekiBooks.DataAcess.Repository.IRepository
         IShoppingCartRepository ShoppingCart { get; }
 
         IApplicationUserRepository ApplicationUser { get; }
-        void Save();
+
+		IOrderHeaderRepository OrderHeader  { get; }
+
+		IOrderDetailRepository OrderDetail { get; }
+		void Save();
     }
 }
