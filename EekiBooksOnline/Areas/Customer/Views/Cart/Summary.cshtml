@@ -1,4 +1,6 @@
 ﻿@model EekiBooks.Models.ViewModels.ShoppingCartVM
+@using Microsoft.Extensions.Options
+@inject IOptions<EekiBooks.Utilities.StripeSettings> Stripe
 
 <form method="post">
 	<br />
