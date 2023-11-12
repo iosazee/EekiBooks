@@ -219,17 +219,18 @@
                                         <input type="submit" class="btn btn-primary form-control my-1"
                                         value="Ship Order" asp-action="ShipOrder" onclick="return validateInput()" />
                                     }
-                                    if (Model.OrderHeader.OrderStatus == SD.PaymentStatusDelayedPaymnt 
-                                        && Model.OrderHeader.OrderStatus == SD.StatusShipped)
+                                    @if (Model.OrderHeader.PaymentStatus == SD.PaymentStatusDelayedPaymnt && 
+                                           Model.OrderHeader.OrderStatus == SD.StatusShipped)
                                     {
-                                        <input type="submit" class="btn btn-primary form-control my-1"
-                                        value="Pay Now" />
+                                        <input type="submit" class="btn btn-warning form-control my-1"
+                                               value="Pay Now"  />
                                     }
-                                    if (Model.OrderHeader.OrderStatus != SD.StatusRefunded
-                                    && Model.OrderHeader.OrderStatus != SD.StatusCancelled)
+                                    @if (Model.OrderHeader.OrderStatus != SD.StatusRefunded
+                                    && Model.OrderHeader.OrderStatus != SD.StatusCancelled &&
+                                      Model.OrderHeader.OrderStatus != SD.StatusShipped)
                                     {
                                         <input type="submit" class="btn btn-danger form-control my-1"
-                                               value="Cancel Order" />
+                                               value="Cancel Order" asp-action="CancelOrder" />
                                     }
                                    
                                 }

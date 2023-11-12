@@ -5,6 +5,7 @@ using EekiBooks.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Stripe;
 using Stripe.Checkout;
 using System.Security.Claims;
 
@@ -19,6 +20,8 @@ namespace EekiBooksOnline.Areas.Customer.Controllers
         public ShoppingCartVM ShoppingCartVM { get; set; }
 
         public int OrderTotal { get; set; }
+
+       
 
         public CartController(IUnitOfWork unitOfWork)
         {
@@ -130,46 +133,49 @@ namespace EekiBooksOnline.Areas.Customer.Controllers
 		}
 
 
+
+
+
         [ActionName("Summary")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-		public IActionResult SummaryPOST()
-		{
-			var claimsIdentity = (ClaimsIdentity)User.Identity;
-			var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+        public IActionResult SummaryPOST()
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
 
             ShoppingCartVM.ListCart = _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == claim.Value,
                 includeProperties: "Product");
 
-           
+
             ShoppingCartVM.OrderHeader.OrderDate = DateTime.Now;
             ShoppingCartVM.OrderHeader.ApplicationUserId = claim.Value;
 
-			foreach (var item in ShoppingCartVM.ListCart)
-			{
-				item.Price = GetPriceBasedOnQuantity(item.Count, item.Product.Price, item.Product.Price50,
-					item.Product.Price100);
-				ShoppingCartVM.OrderHeader.OrderTotal += (item.Price * item.Count);
-			}
+            foreach (var item in ShoppingCartVM.ListCart)
+            {
+                item.Price = GetPriceBasedOnQuantity(item.Count, item.Product.Price, item.Product.Price50,
+                    item.Product.Price100);
+                ShoppingCartVM.OrderHeader.OrderTotal += (item.Price * item.Count);
+            }
 
-            ApplicationUser applicationUser = _unitOfWork.ApplicationUser.GetFirstOrDefault(u=>u.Id == claim.Value);
+            ApplicationUser applicationUser = _unitOfWork.ApplicationUser.GetFirstOrDefault(u => u.Id == claim.Value);
 
             if (applicationUser.CompanyId.GetValueOrDefault() == 0)
             {
-				ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusPending;
-				ShoppingCartVM.OrderHeader.OrderStatus = SD.StatusPending;
-			}
+                ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusPending;
+                ShoppingCartVM.OrderHeader.OrderStatus = SD.StatusPending;
+            }
             else
             {
-				ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusDelayedPaymnt;
-				ShoppingCartVM.OrderHeader.OrderStatus = SD.StatusApproved;
-			}
+                ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusDelayedPaymnt;
+                ShoppingCartVM.OrderHeader.OrderStatus = SD.StatusApproved;
+            }
             _unitOfWork.OrderHeader.Add(ShoppingCartVM.OrderHeader);
             _unitOfWork.Save();
 
 
-			foreach (var item in ShoppingCartVM.ListCart)
-			{
+            foreach (var item in ShoppingCartVM.ListCart)
+            {
                 OrderDetail orderDetail = new()
                 {
                     ProductId = item.ProductId,
@@ -179,7 +185,7 @@ namespace EekiBooksOnline.Areas.Customer.Controllers
                 };
                 _unitOfWork.OrderDetail.Add(orderDetail);
                 _unitOfWork.Save();
-			}
+            }
 
 
             if (applicationUser.CompanyId.GetValueOrDefault() == 0)
@@ -215,8 +221,10 @@ namespace EekiBooksOnline.Areas.Customer.Controllers
 
                 var service = new SessionService();
                 Session session = service.Create(options);
+
+               
                 //ShoppingCartVM.OrderHeader.SessionId = session.Id;
-                //ShoppingCartVM.OrderHeader.PaymentIntentId = session.PaymentIntentId;
+                //ShoppingCartVM.OrderHeader.PaymentIntent = session.PaymentIntentId;
                 _unitOfWork.OrderHeader.UpdateStripePaymentId(ShoppingCartVM.OrderHeader.Id, session.Id, session.PaymentIntentId);
                 _unitOfWork.Save();
 
@@ -225,9 +233,10 @@ namespace EekiBooksOnline.Areas.Customer.Controllers
             }
             else
             {
-                return RedirectToAction("OrderConfirmation", "Cart", new {id = ShoppingCartVM.OrderHeader.Id});
+                return RedirectToAction("OrderConfirmation", "Cart", new { id = ShoppingCartVM.OrderHeader.Id });
             }
-		}
+        }
+
 
 
 
@@ -235,16 +244,22 @@ namespace EekiBooksOnline.Areas.Customer.Controllers
         {
             OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(x => x.Id == id);
 
+            var options = new SessionGetOptions
+            {
+                Expand = new List<string> { "customer", "payment_intent" },
+            };
+
             if (orderHeader.PaymentStatus != SD.PaymentStatusDelayedPaymnt)
             {
 				var service = new SessionService();
-				Session session = service.Get(orderHeader.SessionId);
+				Session session = service.Get(orderHeader.SessionId, options);
 
 				// check stripe payment status
 				if (session.PaymentStatus.ToLower() == "paid")
 				{
 					_unitOfWork.OrderHeader.UpdateStatus(id, SD.StatusApproved, SD.PaymentStatusApproved);
-					_unitOfWork.Save();
+                    orderHeader.PaymentIntent = session.PaymentIntent.Id;
+                    _unitOfWork.Save();
 				}
 			}
 
@@ -256,6 +271,8 @@ namespace EekiBooksOnline.Areas.Customer.Controllers
             _unitOfWork.Save();
             return View(id);
         }
+
+
 
 	}
 }

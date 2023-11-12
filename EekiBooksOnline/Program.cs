@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Identity;
 using EekiBooks.Utilities;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Stripe;
+using Microsoft.Extensions.Hosting;
+using EekiBooksOnline.Areas.Admin.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,8 @@ var connString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connString));
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+builder.Services.AddSingleton<IStripeClient, StripeClient>();
+builder.Services.AddMvc().AddNewtonsoftJson();
 builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddDefaultTokenProviders()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -27,9 +31,29 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
 });
 
+// Configure CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowStripeCheckout",
+        builder =>
+        {
+            builder.WithOrigins("https://checkout.stripe.com")
+                   .AllowAnyHeader()
+                   .AllowAnyMethod()
+                   .AllowCredentials();
+        });
+});
+
+
+builder.Services.AddControllersWithViews().AddApplicationPart(typeof(StripeWebhookController).Assembly);
+
+
 
 
 var app = builder.Build();
+
+
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -44,11 +68,18 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
+
+
+app.UseCors("AllowStripeCheckout");
+
+
 
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
+
 
 app.MapRazorPages();
 
@@ -57,3 +88,7 @@ app.MapControllerRoute(
     pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+
+
+

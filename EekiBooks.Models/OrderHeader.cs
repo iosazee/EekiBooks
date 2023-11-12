@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Stripe;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -41,7 +42,9 @@ namespace EekiBooks.Models
 
 		public string? PaymentIntentId {  get; set; }
 
-		[Required]
+        public string? PaymentIntent { get; set; }
+
+        [Required]
 		public string Name { get; set; }
 
 		[Required]
