@@ -15,6 +15,7 @@ namespace EekiBooks.Models
 		public int Id { get; set; }
 	
 		public string ApplicationUserId { get; set; }
+
 		[ForeignKey("ApplicationUserId")]
 		[ValidateNever]
 		public ApplicationUser ApplicationUser { get; set; }
@@ -24,7 +25,13 @@ namespace EekiBooks.Models
 
 		public DateTime ShippingDate { get; set; }
 
-		public double OrderTotal { get; set; }
+        private double _orderTotal;
+
+        public double OrderTotal 
+		{
+			get => _orderTotal;
+			set => _orderTotal = Math.Round(value, 2);
+		}
 
 		public string? OrderStatus { get; set; }
 

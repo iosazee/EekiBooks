@@ -3,11 +3,13 @@ using EekiBooks.Models;
 using EekiBooks.Models.ViewModels;
 using EekiBooks.Utilities;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
 using Stripe.Checkout;
 using System.Diagnostics;
 using System.Security.Claims;
+using System.Text.Encodings.Web;
 
 namespace EekiBooksOnline.Areas.Admin.Controllers
 {
@@ -16,11 +18,13 @@ namespace EekiBooksOnline.Areas.Admin.Controllers
 	public class OrderController : Controller
 	{
 		private readonly IUnitOfWork _unitOfWork;
+        private readonly IEmailSender _emailSender;
         [BindProperty]
         public OrderVM OrderVM { get; set; }
-		public OrderController(IUnitOfWork unitOfWork) 
+		public OrderController(IUnitOfWork unitOfWork, IEmailSender emailSender) 
 		{ 
 			_unitOfWork = unitOfWork;
+            _emailSender = emailSender;
 		}
 
 		public IActionResult Index()
@@ -97,18 +101,19 @@ namespace EekiBooksOnline.Areas.Admin.Controllers
 
         public IActionResult PaymentConfirmation(int orderHeaderid)
         {
-            OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(x => x.Id == orderHeaderid);
+            OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(x => x.Id == orderHeaderid, 
+                includeProperties:"ApplicationUser");
 
             var options = new SessionGetOptions
             {
-                Expand = new List<string> { "customer", "payment_intent" },
+                Expand = new List<string> { "customer", "payment_intent.latest_charge" },
             };
+
+            var service = new SessionService();
+            Session session = service.Get(orderHeader.SessionId, options);
 
             if (orderHeader.PaymentStatus == SD.PaymentStatusDelayedPaymnt)
             {
-                var service = new SessionService();
-                Session session = service.Get(orderHeader.SessionId, options);
-
                 // check stripe payment status
                 if (session.PaymentStatus.ToLower() == "paid")
                 {
@@ -117,6 +122,13 @@ namespace EekiBooksOnline.Areas.Admin.Controllers
                     _unitOfWork.Save();
                 }
             }
+
+            var receiptUrl = session.PaymentIntent.LatestCharge.ReceiptUrl;
+
+            _emailSender.SendEmailAsync(orderHeader.ApplicationUser.Email, $"PaymentConfirmation: EekiBooks: Order {orderHeader.Id}",
+                    $"<p>Thank you for your payment for Order {orderHeader.Id}, payment has been successfully processed.</P> " +
+                    $"<p> Here are your payment details for your records.</p> View your receipt by " +
+                    $"<a href='{HtmlEncoder.Default.Encode(receiptUrl)}'>clicking here</a>");
 
             return View(orderHeaderid);
         }

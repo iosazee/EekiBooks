@@ -25,6 +25,8 @@ namespace EekiBooks.Utilities
 		public const string PaymentStatusDelayedPaymnt = "ApprovedForDelayedPayment";
 		public const string PaymentStatusRejected = "Rejected";
 
+		public const string SessionCart = "SessionShoppingCart";
+
 	}
 
 }

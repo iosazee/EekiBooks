@@ -3,6 +3,8 @@ using EekiBooks.DataAcess.Repository;
 using EekiBooks.DataAcess.Repository.IRepository;
 using EekiBooks.Models;
 using EekiBooks.Models.ViewModels;
+using EekiBooks.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -10,6 +12,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 namespace EekiBooksOnline.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = SD.Role_Admin)]
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;

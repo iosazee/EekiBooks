@@ -39,7 +39,13 @@ function loadDataTable(status) {
             { "data": "phoneNumber", "width": "15%" },
             { "data": "applicationUser.email", "width": "15%" },
             { "data": "orderStatus", "width": "15%" },
-            { "data": "orderTotal", "width": "10%" },
+            {
+                "data": "orderTotal",
+                "render": function (data) {
+                    return data.toFixed(2);
+                },
+                "width": "10%"
+            },
             {
                 "data": "id",
                 "render": function (data) {

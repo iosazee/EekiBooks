@@ -1,11 +1,14 @@
 ﻿using EekiBooks.DataAccess;
 using EekiBooks.DataAcess.Repository.IRepository;
 using EekiBooks.Models;
+using EekiBooks.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EekiBooksOnline.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = SD.Role_Admin)]
     public class CoverTypeController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;

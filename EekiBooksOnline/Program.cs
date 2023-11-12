@@ -31,6 +31,16 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
 });
 
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(100);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+
+});
+
 // Configure CORS
 builder.Services.AddCors(options =>
 {
@@ -48,11 +58,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllersWithViews().AddApplicationPart(typeof(StripeWebhookController).Assembly);
 
 
-
-
 var app = builder.Build();
-
-
 
 
 // Configure the HTTP request pipeline.
@@ -62,6 +68,7 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+app.UseCors("AllowStripeCheckout");
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
@@ -69,16 +76,11 @@ app.UseStaticFiles();
 app.UseRouting();
 
 
-
-app.UseCors("AllowStripeCheckout");
-
-
-
 app.UseAuthentication();
 
 app.UseAuthorization();
-
 StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
+app.UseSession();
 
 
 app.MapRazorPages();

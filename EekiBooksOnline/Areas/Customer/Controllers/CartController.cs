@@ -3,11 +3,13 @@ using EekiBooks.Models;
 using EekiBooks.Models.ViewModels;
 using EekiBooks.Utilities;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Stripe;
 using Stripe.Checkout;
 using System.Security.Claims;
+using System.Text.Encodings.Web;
 
 namespace EekiBooksOnline.Areas.Customer.Controllers
 {
@@ -16,6 +18,7 @@ namespace EekiBooksOnline.Areas.Customer.Controllers
     public class CartController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IEmailSender _emailSender;
         [BindProperty]
         public ShoppingCartVM ShoppingCartVM { get; set; }
 
@@ -23,9 +26,10 @@ namespace EekiBooksOnline.Areas.Customer.Controllers
 
        
 
-        public CartController(IUnitOfWork unitOfWork)
+        public CartController(IUnitOfWork unitOfWork, IEmailSender emailSender)
         {
             _unitOfWork = unitOfWork;
+            _emailSender = emailSender;
         }
 
         public IActionResult Index()
@@ -66,7 +70,9 @@ namespace EekiBooksOnline.Areas.Customer.Controllers
             if (cart.Count <= 1)
             {
 				_unitOfWork.ShoppingCart.Remove(cart);
-			}
+                var count = _unitOfWork.ShoppingCart.GetAll(p => p.ApplicationUserId == cart.ApplicationUserId).ToList().Count-1;
+                HttpContext.Session.SetInt32(SD.SessionCart, count);
+            }
             else
             {
 				_unitOfWork.ShoppingCart.DecrementCount(cart, 1);
@@ -81,6 +87,8 @@ namespace EekiBooksOnline.Areas.Customer.Controllers
 			var cart = _unitOfWork.ShoppingCart.GetFirstOrDefault(c => c.Id == cartId);
 			_unitOfWork.ShoppingCart.Remove(cart);
 			_unitOfWork.Save();
+            var count = _unitOfWork.ShoppingCart.GetAll(p => p.ApplicationUserId == cart.ApplicationUserId).ToList().Count;
+            HttpContext.Session.SetInt32(SD.SessionCart, count);
 			return RedirectToAction(nameof(Index));
 		}
 
@@ -242,28 +250,33 @@ namespace EekiBooksOnline.Areas.Customer.Controllers
 
         public IActionResult OrderConfirmation(int id)
         {
-            OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(x => x.Id == id);
+            OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(x => x.Id == id, 
+                includeProperties:"ApplicationUser");
 
             var options = new SessionGetOptions
             {
-                Expand = new List<string> { "customer", "payment_intent" },
+                Expand = new List<string> { "customer", "payment_intent.latest_charge" }
             };
+           
 
             if (orderHeader.PaymentStatus != SD.PaymentStatusDelayedPaymnt)
             {
-				var service = new SessionService();
-				Session session = service.Get(orderHeader.SessionId, options);
-
-				// check stripe payment status
-				if (session.PaymentStatus.ToLower() == "paid")
+                var service = new SessionService();
+                Session session = service.Get(orderHeader.SessionId, options);
+                var receiptUrl = session.PaymentIntent.LatestCharge.ReceiptUrl;
+                // check stripe payment status
+                if (session.PaymentStatus.ToLower() == "paid")
 				{
 					_unitOfWork.OrderHeader.UpdateStatus(id, SD.StatusApproved, SD.PaymentStatusApproved);
                     orderHeader.PaymentIntent = session.PaymentIntent.Id;
                     _unitOfWork.Save();
 				}
-			}
-
-			
+                _emailSender.SendEmailAsync(orderHeader.ApplicationUser.Email, "New Order: EekiBooks",
+                  $"<p>Thank you for your Order {orderHeader.Id}, payment has been successfully processed.</P> " +
+                  $"<p> Here are your payment details for your records.</p> View your receipt by " +
+                  $"<a href='{HtmlEncoder.Default.Encode(receiptUrl)}'>clicking here</a>");
+            }
+          
             List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart.
                     GetAll(u=>u.ApplicationUserId==orderHeader.ApplicationUserId).ToList();
             //OrderHeader and OrderDetail tables have been populated, the shoppingcart has to be cleared now:

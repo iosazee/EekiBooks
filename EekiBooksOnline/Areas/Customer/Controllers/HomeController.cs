@@ -1,5 +1,6 @@
 ﻿using EekiBooks.DataAcess.Repository.IRepository;
 using EekiBooks.Models;
+using EekiBooks.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -54,13 +55,17 @@ namespace EekiBooksOnline.Areas.Customer.Controllers
             if ( cartFromDb == null )
             {
                 _unitOfWork.ShoppingCart.Add(shoppingCart);
+                _unitOfWork.Save();
+                HttpContext.Session.SetInt32(SD.SessionCart, _unitOfWork.ShoppingCart.GetAll(
+                    u => u.ApplicationUserId == claim.Value).ToList().Count);
             }
             else
             {
                 _unitOfWork.ShoppingCart.IncrementCount(cartFromDb, shoppingCart.Count);
+                _unitOfWork.Save();
             }
 
-            _unitOfWork.Save();
+           
 
             return RedirectToAction(nameof(Index));
         }
