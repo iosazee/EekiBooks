@@ -15,15 +15,28 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var connString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddControllersWithViews();
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connString));
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(connString,
+        sqlServerOptions =>
+        {
+            sqlServerOptions.CommandTimeout(3600);
+            sqlServerOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(30), null);
+        }));
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 builder.Services.AddSingleton<IStripeClient, StripeClient>();
 builder.Services.AddMvc().AddNewtonsoftJson();
 builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddDefaultTokenProviders()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultUI();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddSingleton<IEmailSender, EmailSender>();
 builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+var fbAppId = builder.Configuration.GetValue<string>("FacebookAppId");
+var fbAppSecret = builder.Configuration.GetValue<string>("FacebookAppSecret");
+builder.Services.AddAuthentication().AddFacebook(options =>
+{
+    options.AppId = fbAppId;
+    options.AppSecret = fbAppSecret;
+});
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = $"/Identity/Account/Login";
