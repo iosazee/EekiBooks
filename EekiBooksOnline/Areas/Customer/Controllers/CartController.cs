@@ -279,8 +279,11 @@ namespace EekiBooksOnline.Areas.Customer.Controllers
           
             List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart.
                     GetAll(u=>u.ApplicationUserId==orderHeader.ApplicationUserId).ToList();
+           
             //OrderHeader and OrderDetail tables have been populated, the shoppingcart has to be cleared now:
             _unitOfWork.ShoppingCart.RemoveRange(shoppingCarts);
+            //var count = shoppingCarts.Count();
+            HttpContext.Session.SetInt32(SD.SessionCart, 0);
             _unitOfWork.Save();
             return View(id);
         }
