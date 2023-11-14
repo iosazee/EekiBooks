@@ -4,6 +4,7 @@ using EekiBooks.Models;
 using EekiBooks.Utilities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -20,14 +21,17 @@ namespace EekiBooks.DataAcess.DbInitializer
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ApplicationDbContext _db;
+        private readonly IConfiguration _configuration;
 
         public DbInitializer(UserManager<IdentityUser> userManager,
                 RoleManager<IdentityRole> roleManager,
+                IConfiguration configuration,
                 ApplicationDbContext db)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _db = db;
+            _configuration = configuration;
            
         }
 
@@ -54,18 +58,19 @@ namespace EekiBooks.DataAcess.DbInitializer
                 _roleManager.CreateAsync(new IdentityRole(SD.Role_User_Comp)).GetAwaiter().GetResult();
                 _roleManager.CreateAsync(new IdentityRole(SD.Role_User_Indi)).GetAwaiter().GetResult();
 
-
+                var passWord = _configuration["Email:Password"];
+                var username = _configuration["Email:Username"];
                 //Create admin user, if not created
                 _userManager.CreateAsync(new ApplicationUser
                 {
-                    UserName = "test@eekibooks.com",
-                    Email = "test@eekibooks.com",
+                    UserName = username,
+                    Email = username,
                     Name = "Don Draper ",
                     PhoneNumber = "1234567890",
                     StreetAddress = "test 123 Drive",
                     City = "Lincoln",
                     PostalCode = "DF291BN"
-                }, "Benin*10").GetAwaiter().GetResult();
+                }, passWord).GetAwaiter().GetResult();
                
 
                 ApplicationUser user = _db.ApplicationUsers.FirstOrDefault(u => u.Email == "saze@myyahoo.com");
