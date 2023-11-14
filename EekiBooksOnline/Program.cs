@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Stripe;
 using Microsoft.Extensions.Hosting;
 using EekiBooksOnline.Areas.Admin.Controllers;
+using EekiBooks.DataAcess.DbInitializer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,7 @@ builder.Services.AddMvc().AddNewtonsoftJson();
 builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddDefaultTokenProviders()
     .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultUI();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 builder.Services.AddSingleton<IEmailSender, EmailSender>();
 builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 var fbAppId = builder.Configuration.GetValue<string>("FacebookAppId");
@@ -87,15 +89,11 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
-
-app.UseAuthentication();
-
-app.UseAuthorization();
 StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
+SeedDatabase();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseSession();
-
-
 app.MapRazorPages();
 
 app.MapControllerRoute(
@@ -104,6 +102,16 @@ app.MapControllerRoute(
 
 app.Run();
 
+
+
+void SeedDatabase()
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+        dbInitializer.Initialize();
+    }
+}
 
 
 

@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EekiBooks.Models\EekiBooks.Models.csproj" />
+    <ProjectReference Include="..\EekiBooks.Utilities\EekiBooks.Utilities.csproj" />
   </ItemGroup>
 
 </Project>
